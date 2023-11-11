@@ -1,10 +1,10 @@
-// Becouse of chrome extension limitation, only aproximatly 55000 entries can be stored at once
 let entries = []
 
 class Entry {
-    constructor(id, name, rating, before, after) {
+    constructor(id, name, rating, before, after, notes) {
         this.id = id
         this.name = name
+        this.notes = notes
         this.rating = rating
         this.before = before
         this.after = after
@@ -16,17 +16,22 @@ class Entry {
         // Row
         const row = document.createElement('div')
         row.setAttribute('class', 'row')
+        // Naming
+        row.setAttribute('name', this.before + this.name + this.after)
         // Cells
         const idCell = document.createElement('div')
         const nameCell = document.createElement('div')
+        const notesCell = document.createElement('div')
         const ratingCell = document.createElement('div')
         const removeBtnCell = document.createElement('div')
         idCell.setAttribute('class', 'cell')
         nameCell.setAttribute('class', 'cell')
+        notesCell.setAttribute('class', 'cell')
         ratingCell.setAttribute('class', 'cell')
         removeBtnCell.setAttribute('class', 'cell')
         row.appendChild(idCell)
         row.appendChild(nameCell)
+        row.appendChild(notesCell)
         row.appendChild(ratingCell)
         row.appendChild(removeBtnCell)
         // Text inside cells
@@ -34,6 +39,7 @@ class Entry {
         const before = document.createElement('a')
         const name = document.createElement('p')
         const after = document.createElement('a')
+        const notes = document.createElement('input')
         const rating = document.createElement('input')
         id.textContent = this.id
         id.setAttribute('href', this.url)
@@ -43,23 +49,30 @@ class Entry {
         after.setAttribute('class', 'nameAfter')
         before.textContent = this.before + " "
         after.textContent = " " + this.after
+        // Name
+        name.setAttribute('class', 'name')
+        name.addEventListener('click', () => {this.view(this.id)})
         name.appendChild(before)
         const nameText = document.createTextNode(this.name)
         name.appendChild(nameText)
         name.appendChild(after)
         nameCell.appendChild(name)
         idCell.appendChild(id)
+        // Notes
+        notes.setAttribute('class', 'notes')
+        notes.setAttribute('value', this.notes)
+        notes.addEventListener('blur', () => {this.saveNotes(notes.value)})
+        notes.addEventListener("keypress", (event) => { if (event.key === "Enter") { this.saveNotes(notes.value) } })
+        notesCell.appendChild(notes)
         // Rating
-        rating.textContent = this.rating
         rating.setAttribute('class', 'rating')
         rating.setAttribute('type', 'number')
         rating.setAttribute('min', '1')
         rating.setAttribute('max', '10')
         rating.setAttribute('value', this.rating)
-        if (this.rating == undefined) { rating.setAttribute('class', 'nonRated rating') }
         rating.addEventListener("blur", () => { this.saveRating(rating.value); console.log(rating.value) })
         rating.addEventListener("keypress", (event) => { if (event.key === "Enter") { this.saveRating(rating.value) } })
-        ratingCell.appendChild(rating)
+        ratingCell.appendChild(rating)        
         // Remove button
         const removeBtn = document.createElement('a')
         removeBtn.setAttribute('class', 'removeBtn')
@@ -96,12 +109,57 @@ class Entry {
             }
             chrome.storage.local.set({ 'entries': result.entries }, () => {
                 console.log("Rating saved sucesfully: (" + this.rating + ")")
-                console.log(result.entries)
                 location.reload()
             })
         })
     }
+
+    saveNotes(notes) {
+        this.notes = notes
+        chrome.storage.local.get(['entries'], (result) => {
+            for (let i = 0; i < result.entries.length; i++) {
+                if (result.entries[i].id == this.id) {
+                    result.entries[i].notes = this.notes
+                }
+            }
+            chrome.storage.local.set({ 'entries': result.entries }, () => {
+                console.log("Notes saved sucesfully: (" + this.notes + ")")
+                location.reload()
+            })
+        })
+    } 
+
+    view() {
+        const url = new URL(window.location.href)
+        url.pathname = "/ui/entry.html"
+        window.location.href = addQueryParam('id', this.id, url)
+    }
 }
+
+function addQueryParam(key, value, url) {
+    const curentUrl = new URL(url)
+    const params = new URLSearchParams(curentUrl.search)
+    params.append(key, value)
+    curentUrl.search = params.toString()
+    return curentUrl.toString()
+}
+
+// Search engine
+
+// document.getElementById('searchbar').addEventListener('input',  () => {
+//     const searchBar = document.getElementById('searchbar')
+//     const value = searchBar.value.toLowerCase()
+//     console.log(value)
+
+//     const items = document.getElementsByClassName('row')
+//     console.log(items)
+//     for(let i = 0; i < items.length; i++) {
+//         if (items[i].toLowerCase().includes(value)) {
+//             console.log
+//         }
+//     }
+
+// })
 
 async function createArray() {
     return new Promise((resolve, reject) => {
@@ -111,7 +169,7 @@ async function createArray() {
                 alert("Error, please refresh the site.")
             } else {
                 for (let i = 0; i < result.entries.length; i++) {
-                    entries.push(new Entry(result.entries[i].id, result.entries[i].name, result.entries[i].rating, result.entries[i].before, result.entries[i].after))
+                    entries.push(new Entry(result.entries[i].id, result.entries[i].name, result.entries[i].rating, result.entries[i].before, result.entries[i].after, result.entries[i].notes))
                 }
                 resolve();
             }
@@ -195,15 +253,12 @@ const showHideBeforeAfter = document.getElementById('showHideBeforeAfter');
 
 addEventListener('load', () => {
     chrome.storage.local.get(['visible'], (result) => {
-        console.log(result.visible);
         visible = result.visible;
         if (result.visible == false) {
-            console.log("asdasd")
             const nameBeforeAfterQ = document.querySelectorAll('.nameBefore, .nameAfter');
     
             for (let i = 0; i < nameBeforeAfterQ.length; i++) {
                 nameBeforeAfterQ[i].classList.add('hidden')
-                console.log(nameBeforeAfterQ[i])
     
             }
             showHideBeforeAfter.innerHTML = 'Show before and after'

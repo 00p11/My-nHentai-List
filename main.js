@@ -5,11 +5,12 @@ console.log("Extension My nHentai List loaded")
 var curentEntry
 
 class Entry {
-    constructor(id, name, before, after) {
+    constructor(id, name, before, after, cover) {
         this.id = this.getId()
         this.name = this.getName()
         this.before = this.getBefore()
         this.after = this.getAfter()
+        this.cover = this.getCover()
     }
 
     actualizateProperties() {
@@ -19,11 +20,15 @@ class Entry {
         this.after = this.getAfter()
     }
 
+    async saveAnyWay() {
+        saveEntry(this.id, this.name, this.before, this.after, this.cover)
+    }
+
     async saveEntry() {
         this.getBefore()
         const isDuplicate = await checkDuplicate(this.id);
         if (!isDuplicate) {
-            saveEntry(this.id, this.name, this.before, this.after)
+            saveEntry(this.id, this.name, this.before, this.after, this.cover)
         } else {
             console.log('Duplicate')
         }
@@ -56,17 +61,23 @@ class Entry {
         const after = afterElement.textContent.trim();
         return after;
     }
+
+    getCover() {
+        const cover = document.getElementById('cover').firstChild.firstChild.src
+        console.log(cover)
+        return cover;
+    }
 }
 
 // Functions
 
-async function saveEntry(id, name, before, after) {
+async function saveEntry(id, name, before, after, cover) {
     if (id != undefined || name != undefined) {
         chrome.storage.local.get(['entries'], function (result) {
             if (result.entries) {
-                result.entries.push({ id: id, name: name, before: before, after: after })
+                result.entries.push({ id: id, name: name, before: before, after: after, notes: '' , cover: cover})
             } else {
-                result.entries = [{ id: id, name: name, before: before, after: after }]
+                result.entries = [{ id: id, name: name, before: before, after: after, notes: '' , cover: cover}]
             }
             chrome.storage.local.set({ entries: result.entries }, function () {
                 console.log("Data saved (id: " + id + ", name: " + name + ", before: " + before + ", after: " + after + ")")
@@ -109,6 +120,7 @@ async function deleteEntries() {
 addEventListener('keydown', (e) => {
     if (e.key === "n") { curentEntry.saveEntry() }
     if (e.key === "m") { getEntries() }
+    if (e.key === "a") { curentEntry.saveAnyWay() }
 })
 
 // Init function that creates a temporary object for the entry
