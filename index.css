@@ -1,0 +1,143 @@
+:root {
+  --background: #0d0d0d;
+  --section: #1f1f1f;
+  --fadedText: #959595;
+  --text: #ffffff;
+  --hover: #383838;
+  --coloreOne: #ed2553;
+  --coloreTwo: #4d4d4d;
+}
+
+body {
+  background-color: var(--background);
+  margin-top: 0;
+}
+
+section, header {
+  background-color: var(--section);
+}
+
+a:not(.nameBefore, .nameAfter), .removeBtn {
+  color: var(--coloreOne);
+  cursor: pointer;
+}
+
+a:hover:not(.nameBefore, .nameAfter, .noneHover), button:hover, .whiteHover:hover {
+  background-color: var(--hover);
+  border-radius: 5px;
+}
+
+.name {
+  overflow: hidden;
+}
+
+#exportBtn, #importBtn, #showHideBeforeAfter {
+  user-select: none;
+}
+
+.list {
+  display: table;
+  background-color: var(--section);
+  border-collapse: collapse;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.row {
+  display: table-row;
+}
+
+.cell {
+  display: table-cell;
+  border: 1px solid var(--coloreTwo);
+  color: var(--text);
+  padding: 5px;
+}
+
+.header {
+  font-weight: bold;
+  opacity: 0.5;
+  text-align: center;
+}
+
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.rating {
+  width: 1rem;
+  -moz-appearance: textfield;
+  border: 1px solid var(--coloreOne);
+  background-color: var(--section);
+  color: var(--text);
+  border-radius: 5px;
+}
+
+.nonRated::before {
+  content: "-";
+  color: var(--fadedText);
+}
+
+.rating::after {
+  content: "/10";
+  color: var(--fadedText);
+}
+
+#id::before {
+  content: "#";
+}
+
+header {
+  display: flex;
+}
+
+.nameBefore, .nameAfter {
+  color: var(--fadedText);
+}
+
+.exports, .beforeAfterDisplay {
+  margin: 0.85rem;
+}
+
+.hidden {
+  display: none;
+}
+
+#logo {
+  padding: 10px;
+  width: 2.875rem;
+  height: auto;
+  cursor: pointer;
+}
+
+#searchIcon {
+  color: var(--fadedText);
+}
+
+.notes {
+  background-color: var(--section);
+  border: 1px solid var(--coloreOne);
+  border-radius: 5px;
+  color: var(--text);
+  width: 5rem;
+}
+
+.notes:focus {
+  position: absolute;
+  width: fit-content;
+  margin-top: 0.52rem;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--coloreTwo);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ed2554;
+  opacity: 20;
+}
